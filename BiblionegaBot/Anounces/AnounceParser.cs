@@ -1,4 +1,4 @@
-using AngleSharp;
+﻿using AngleSharp;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -6,6 +6,7 @@ using System.Linq;
 using AngleSharp.Dom;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
+using System.Net.Http;
 
 namespace BiblionegaBot.Anounces
 {
@@ -13,24 +14,29 @@ namespace BiblionegaBot.Anounces
     {
         private readonly string _siteAddress;
         private readonly string _anouncesPath;
-        private readonly IBrowsingContext _context;
         private readonly Regex dateTimeRegex = new Regex("\\d{2}\\.\\d{2}\\.\\d{4}\\s\\d{2}:\\d{2}:\\d{2}");
         private readonly ILogger<AnounceParser> _logger;
+        private readonly HttpClient _httpClient;
 
         public AnounceParser(string siteAddress, string anouncesPath, ILogger<AnounceParser> logger)
         {
             _siteAddress = siteAddress;
             _anouncesPath = anouncesPath;
-            var config = Configuration.Default.WithDefaultLoader();
-            _context = BrowsingContext.New(config);
-            _logger = logger;            
+            _logger = logger;
+            _httpClient = new HttpClient();
         }
 
         public async Task<IEnumerable<Anounce>> ParseAnouncesAsync()
         {
             _logger.LogInformation("Try to parse anounces");
             var address = _siteAddress + _anouncesPath;
-            var document = await _context.OpenAsync(address).ConfigureAwait(false);
+            var document = await GetDocumentAsync(address).ConfigureAwait(false);
+            if(document.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                _logger.LogWarning("Document status: {Status}", document.StatusCode);
+
+                return null;
+            }
             var anounceSelector = "div.news__item";
             var anounceNodes = document.QuerySelectorAll(anounceSelector);
             var anounces = new List<Anounce>();
@@ -40,6 +46,13 @@ namespace BiblionegaBot.Anounces
             }
 
             return anounces.OrderBy(a => a.Id);
+        }
+                
+        private async Task<IDocument> GetDocumentAsync(string address)
+        {
+            using var documentStream = await _httpClient.GetStreamAsync(address).ConfigureAwait(false);
+            var context = BrowsingContext.New(Configuration.Default.WithDefaultLoader());
+            return await context.OpenAsync(req => req.Content(documentStream)).ConfigureAwait(false);
         }
 
         private async Task<Anounce> ParseAnounceAsync(IElement anounceNode)
@@ -52,8 +65,8 @@ namespace BiblionegaBot.Anounces
             anounce.Link = _siteAddress + titleNode.GetAttribute("href");
             anounce.Message = anounceNode.QuerySelector("div.news__item__text").Text().Trim();
             anounce.Category = GetAnounceCategory(anounce);
-
-            var anounceDocument = await _context.OpenAsync(anounce.Link).ConfigureAwait(false);
+                        
+            var anounceDocument = await GetDocumentAsync(anounce.Link).ConfigureAwait(false);
 
             var detailText = anounceDocument.QuerySelector("div.news-detail").Text().Trim();
             var match = dateTimeRegex.Matches(detailText).Last();

@@ -1,4 +1,5 @@
-using BiblionegaBot.Anounces;
+﻿using BiblionegaBot.Anounces;
+using BiblionegaBot.Extensions;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
@@ -34,6 +35,10 @@ namespace BiblionegaBot
             var chatId = _configuration["ChatId"];
             _logger.LogInformation("Start {BotName} for {ChatId}", (await _botClient.GetMeAsync().ConfigureAwait(false)).FirstName, chatId);
             var anounces = await _anounceParser.ParseAnouncesAsync().ConfigureAwait(false);
+            if (anounces == null)
+            {
+                return;
+            }
             _logger.LogInformation("{Count} anounces were found", anounces.Count());
             var lastStoredAnounce = _dataLayer.GetLastStoredAnounce();
             if (lastStoredAnounce != null)
