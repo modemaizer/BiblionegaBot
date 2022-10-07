@@ -1,4 +1,4 @@
-﻿using AngleSharp;
+using AngleSharp;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -51,6 +51,7 @@ namespace BiblionegaBot.Anounces
             anounce.Title = titleNode.Text().Trim();
             anounce.Link = _siteAddress + titleNode.GetAttribute("href");
             anounce.Message = anounceNode.QuerySelector("div.news__item__text").Text().Trim();
+            anounce.Category = GetAnounceCategory(anounce);
 
             var anounceDocument = await _context.OpenAsync(anounce.Link).ConfigureAwait(false);
 

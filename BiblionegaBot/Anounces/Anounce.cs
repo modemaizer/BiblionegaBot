@@ -9,5 +9,6 @@ namespace BiblionegaBot.Anounces
         public string Link { get; set; }
         public DateTime Created { get; set; }
         public string Message { get; set; }
+        public AnounceCategory Category { get; set; }
     }
 }
