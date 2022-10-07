@@ -1,4 +1,4 @@
-﻿using BiblionegaBot.Anounces;
+using BiblionegaBot.Anounces;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
@@ -45,7 +45,7 @@ namespace BiblionegaBot
             {
                 if (_dataLayer.SaveAnounce(anounce) && !silent)
                 {
-                    var message = $"<b>{anounce.Title}</b>\n" + 
+                    var message = $"<b>{anounce.Category.GetDescription()} {anounce.Title}</b>\n" + 
                         $"<b>{anounce.Created:dd.MM.yyyy HH:mm}</b>\n" +                        
                         $"<i>{anounce.Message}</i>";
                     try
