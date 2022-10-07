@@ -29,22 +29,24 @@ namespace BiblionegaBot
             _botClient = new TelegramBotClient(configuration["BotApiKey"]);
         }
 
-        internal async Task RunAsync()
+        internal async Task RunAsync(bool silent)
         {
             var chatId = _configuration["ChatId"];
             _logger.LogInformation("Start {BotName} for {ChatId}", (await _botClient.GetMeAsync().ConfigureAwait(false)).FirstName, chatId);
             var anounces = await _anounceParser.ParseAnouncesAsync().ConfigureAwait(false);
+            _logger.LogInformation("{Count} anounces were found", anounces.Count());
             var lastStoredAnounce = _dataLayer.GetLastStoredAnounce();
             if (lastStoredAnounce != null)
             {
                 anounces = anounces.Where(a => a.Id > lastStoredAnounce.Id).ToList();
             }
+            var count = 0;
             foreach (var anounce in anounces)
             {
-                if (_dataLayer.SaveAnounce(anounce))
+                if (_dataLayer.SaveAnounce(anounce) && !silent)
                 {
                     var message = $"<b>{anounce.Title}</b>\n" + 
-                        $"<b>{anounce.Created.ToString("dd.MM.yyyy HH:mm")}</b>\n" +                        
+                        $"<b>{anounce.Created:dd.MM.yyyy HH:mm}</b>\n" +                        
                         $"<i>{anounce.Message}</i>";
                     try
                     {
@@ -62,6 +64,10 @@ namespace BiblionegaBot
                         {
                             _logger.LogWarning("Anounce {AnounceId} wasn't sent to chat {ChatId}", anounce.Id, chatId);
                         }
+                        else
+                        {
+                            count++;
+                        }
                     }
                     catch(Exception exception)
                     {
@@ -69,6 +75,7 @@ namespace BiblionegaBot
                     }
                 }
             }
+            _logger.LogInformation("{Count} anounces were sent", count);
         }
     }
 }
