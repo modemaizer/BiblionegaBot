@@ -72,5 +72,23 @@ namespace BiblionegaBot.Anounces
 
             return anounce;
         }
+
+        private AnounceCategory GetAnounceCategory(Anounce anounce)
+        {
+            if(anounce.Title.ToLower().Contains(" рэс") || anounce.Message.ToLower().Contains(" электроэнерги"))
+            {
+                return AnounceCategory.Electric;
+            }
+            if(anounce.Title.ToLower().Contains(" онега-энергия") || anounce.Message.ToLower().Contains(" теплоснабжени"))
+            {
+                return AnounceCategory.Heating;
+            }
+            if(anounce.Message.ToLower().Contains(" угмс"))
+            {
+                return AnounceCategory.Weather;
+            }
+            return AnounceCategory.Default;
+
+        }
     }
 }
