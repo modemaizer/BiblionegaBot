@@ -41,7 +41,13 @@ namespace BiblionegaBot
 
             using ServiceProvider serviceProvider = services.BuildServiceProvider();
             Worker app = serviceProvider.GetService<Worker>();
-            await app.RunAsync().ConfigureAwait(false);            
+            var silent = false;
+            if (args.Length > 0)
+            {
+                bool.TryParse(args[0], out silent);
+            }
+            
+            await app.RunAsync(silent).ConfigureAwait(false);
         }
     }
 }
