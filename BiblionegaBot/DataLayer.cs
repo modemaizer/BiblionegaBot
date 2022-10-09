@@ -6,7 +6,7 @@ using Telegram.Bot.Types;
 
 namespace BiblionegaBot
 {    
-    internal class DataLayer : IDataLayer
+    public class DataLayer : IDataLayer
     {
         private readonly string _databasePath;
         private readonly ILogger<DataLayer> _logger;

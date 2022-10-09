@@ -22,7 +22,6 @@ namespace BiblionegaBot
                     configuration["AnouncesPath"], 
                     s.GetService<ILogger<AnounceParser>>()))
                 .AddSingleton<ISender>(s => new Sender(
-                    s.GetService<IDataLayer>(),
                     s.GetService<ILogger<Sender>>(),
                     s.GetService<ITelegramBotClient>()))
                 .AddSingleton<IDataLayer>(s => new DataLayer(

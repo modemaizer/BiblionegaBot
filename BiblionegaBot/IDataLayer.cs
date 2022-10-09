@@ -3,7 +3,7 @@ using Telegram.Bot.Types;
 
 namespace BiblionegaBot
 {
-    internal interface IDataLayer
+    public interface IDataLayer
     {
         Anounce GetLastStoredAnounce();
         bool SaveAnounce(Anounce anounce);
