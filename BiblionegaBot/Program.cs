@@ -3,6 +3,7 @@ using BiblionegaBot.Anounces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
+using Telegram.Bot;
 
 namespace BiblionegaBot
 {
@@ -13,15 +14,21 @@ namespace BiblionegaBot
             services.AddTransient(s => new Worker(
                     s.GetService<ILogger<Worker>>(), 
                     s.GetService<IAnounceParser>(), 
+                    s.GetService<ISender>(),
                     s.GetService<IDataLayer>(),
                     configuration))
                 .AddSingleton<IAnounceParser>(s => new AnounceParser(
                     configuration["SiteAddress"], 
                     configuration["AnouncesPath"], 
                     s.GetService<ILogger<AnounceParser>>()))
+                .AddSingleton<ISender>(s => new Sender(
+                    s.GetService<IDataLayer>(),
+                    s.GetService<ILogger<Sender>>(),
+                    s.GetService<ITelegramBotClient>()))
                 .AddSingleton<IDataLayer>(s => new DataLayer(
                     s.GetService<ILogger<DataLayer>>(), 
-                    configuration["Database"]));
+                    configuration["Database"]))
+                .AddSingleton<ITelegramBotClient>(s => new TelegramBotClient(configuration["BotApiKey"]));
 
             services.AddLogging(loggingBuilder => {
                 var loggingSection = configuration.GetSection("Logging");
