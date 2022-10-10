@@ -64,7 +64,7 @@ namespace BiblionegaBot.Anounces
             anounce.Title = titleNode.Text().Trim();
             anounce.Link = _siteAddress + titleNode.GetAttribute("href");
             anounce.Message = anounceNode.QuerySelector("div.news__item__text").Text().Trim();
-            anounce.Category = GetAnounceCategory(anounce);
+            anounce.Category = Anounce.GetAnounceCategory(anounce);
                         
             var anounceDocument = await GetDocumentAsync(anounce.Link).ConfigureAwait(false);
 
@@ -84,33 +84,6 @@ namespace BiblionegaBot.Anounces
             }
 
             return anounce;
-        }
-
-        private AnounceCategory GetAnounceCategory(Anounce anounce)
-        {
-            if(anounce.Title.ToLower().Contains(" рэс") || anounce.Message.ToLower().Contains(" электроэнерги"))
-            {
-                return AnounceCategory.Electric;
-            }
-            if(anounce.Title.ToLower().Contains("онега-энергия") || anounce.Message.ToLower().Contains(" теплоснабжени") || anounce.Message.ToLower().Contains("онега-энергия"))
-            {
-                return AnounceCategory.Heating;
-            }
-            if(anounce.Message.ToLower().Contains(" угмс"))
-            {
-                return AnounceCategory.Weather;
-            }
-            if(anounce.Message.ToLower().Contains(" движен") && anounce.Message.ToLower().Contains(" автотранспорт"))
-            {
-                return AnounceCategory.RoadIssue;
-            }
-            if(anounce.Message.ToLower().Contains("ржд"))
-            {
-                return AnounceCategory.Railway;
-            }
-
-            return AnounceCategory.Default;
-
         }
     }
 }
