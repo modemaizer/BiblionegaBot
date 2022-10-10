@@ -10,7 +10,7 @@ using System.Net.Http;
 
 namespace BiblionegaBot.Anounces
 {
-    internal class AnounceParser : IAnounceParser
+    public class AnounceParser : IAnounceParser
     {
         private readonly string _siteAddress;
         private readonly string _anouncesPath;
@@ -33,7 +33,7 @@ namespace BiblionegaBot.Anounces
             var document = await GetDocumentAsync(address).ConfigureAwait(false);
             if(document.StatusCode != System.Net.HttpStatusCode.OK)
             {
-                _logger.LogWarning("Document status: {Status}", document.StatusCode);
+                _logger.LogWarning("Anounces list document status: {Status}", document.StatusCode);
 
                 return null;
             }
@@ -42,10 +42,40 @@ namespace BiblionegaBot.Anounces
             var anounces = new List<Anounce>();
             foreach (var anounceNode in anounceNodes) 
             {
-                anounces.Add(await ParseAnounceAsync(anounceNode).ConfigureAwait(false));
+                anounces.Add(ParseAnounce(anounceNode));
             }
 
             return anounces.OrderBy(a => a.Id);
+        }
+
+        public async Task ParseAnounceDetailsAsync(Anounce anounce)
+        {
+            try
+            {
+                var anounceDocument = await GetDocumentAsync(anounce.Link).ConfigureAwait(false);
+                if (anounceDocument.StatusCode != System.Net.HttpStatusCode.OK)
+                {
+                    _logger.LogWarning("Anounce details document status: {Status}", anounceDocument.StatusCode);
+
+                    return;
+                }
+                var detailText = anounceDocument.QuerySelector("div.news-detail").Text().Trim();
+                var match = dateTimeRegex.Matches(detailText).Last();
+                if (match != null && DateTime.TryParse(match.Value, out var createdDateTime))
+                {
+                    anounce.Created = createdDateTime;
+                }
+                else if (anounce.Created == default)
+                {
+                    anounce.Created = DateTime.Now;
+                }
+            }
+            catch(Exception exception)
+            {
+                _logger.LogError(exception, "Getting anounce {AnounceId} details failed", anounce.Id);
+            }
+
+            return;
         }
                 
         private async Task<IDocument> GetDocumentAsync(string address)
@@ -55,7 +85,7 @@ namespace BiblionegaBot.Anounces
             return await context.OpenAsync(req => req.Content(documentStream)).ConfigureAwait(false);
         }
 
-        private async Task<Anounce> ParseAnounceAsync(IElement anounceNode)
+        private Anounce ParseAnounce(IElement anounceNode)
         {
             var anounce = new Anounce();
             var idText = anounceNode.Id;
@@ -65,22 +95,9 @@ namespace BiblionegaBot.Anounces
             anounce.Link = _siteAddress + titleNode.GetAttribute("href");
             anounce.Message = anounceNode.QuerySelector("div.news__item__text").Text().Trim();
             anounce.Category = Anounce.GetAnounceCategory(anounce);
-                        
-            var anounceDocument = await GetDocumentAsync(anounce.Link).ConfigureAwait(false);
-
-            var detailText = anounceDocument.QuerySelector("div.news-detail").Text().Trim();
-            var match = dateTimeRegex.Matches(detailText).Last();
-            if(match != null && DateTime.TryParse(match.Value, out var createdDateTime))
-            {
-                anounce.Created = createdDateTime;
-            }
-            else if(DateTime.TryParse(anounceNode.QuerySelector("div.news__item__date").Text().Trim(), out var createdDate))
+            if (DateTime.TryParse(anounceNode.QuerySelector("div.news__item__date").Text().Trim(), out var createdDate))
             {
                 anounce.Created = createdDate;
-            }
-            else
-            {
-                anounce.Created = DateTime.Now;
             }
 
             return anounce;

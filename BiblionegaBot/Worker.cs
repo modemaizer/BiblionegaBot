@@ -44,7 +44,8 @@ namespace BiblionegaBot
             }
             var count = 0;
             foreach (var anounce in anounces)
-            {   
+            {
+                await _anounceParser.ParseAnounceDetailsAsync(anounce).ConfigureAwait(false);
                 if(_dataLayer.SaveAnounce(anounce) && 
                     !silent && 
                     await _sender.SendAnounceAsync(anounce, chatId).ConfigureAwait(false) != null)

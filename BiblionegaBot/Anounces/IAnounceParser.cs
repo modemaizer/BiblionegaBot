@@ -3,8 +3,10 @@ using System.Threading.Tasks;
 
 namespace BiblionegaBot.Anounces
 {
-    internal interface IAnounceParser
+    public interface IAnounceParser
     {
         Task<IEnumerable<Anounce>> ParseAnouncesAsync();
+
+        Task ParseAnounceDetailsAsync(Anounce anounce);
     }
 }
