@@ -10,6 +10,8 @@ namespace BiblionegaBot.Anounces
         Default,
         [Description("\U000026A1")] //high voltage sign
         Electric,
+        [Description("\U0001F6B0")] //portable water
+        Water,
         [Description("\U0001F3ED")] //factory
         Heating,
         [Description("\U00002614")] //umbrella with rain drops
