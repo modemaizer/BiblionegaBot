@@ -30,12 +30,12 @@ public class SenderTests
         var anounce = new Anounce
         {
             Id = 123,
-            Title = "Test Anounce Title",
-            Category = AnounceCategory.RoadIssue,
-            Message = "Test Anounce Message",
+            Title = "Сообщение от ООО \"Водоканал\"",
+            Message = "По сообщению дисп. ООО \" Водоканал\" в связи с плановыми работами, будет остановлен-головной забор и резервная насосная станция (ул. Пионерская) 16.10.2022г. с  06::00 до 13:00 будет прекращена подача ХВС  ( город )",
             Link = "http://onegaland.ru",
             Created = DateTime.Now
         };
+        anounce.Category = Anounce.GetAnounceCategory(anounce);
 
         var sendResult = await _sender.SendAnounceAsync(anounce, "@biblionega_test").ConfigureAwait(false);
 
