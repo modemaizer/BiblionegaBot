@@ -1,19 +1,19 @@
 ﻿using BiblionegaBot.Anounces;
 using BiblionegaBot.Extensions;
-using System;
-using System.Threading.Tasks;
-using Telegram.Bot.Types.ReplyMarkups;
-using Telegram.Bot.Types;
 using Microsoft.Extensions.Logging;
-using Telegram.Bot;
+using System;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using Telegram.Bot;
+using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace BiblionegaBot
 {
     public class Sender : ISender
     {
         private static readonly Regex _boldRegex = new("(?:\\d{1,2}\\.\\d{1,2}\\.\\d{4}г?|\\d{2}:\\d{2}|\\d{1,2} (?:января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря)|(?:с|с|до|по) \\d{2}:\\d{2})");
-
+        private static readonly Regex _telefonogramRegex = new("\\n*ТЕЛЕФОНОГРАММА №\\d+\\n*");
         private readonly ILogger<Sender> _logger;
         private readonly ITelegramBotClient _botClient;
 
@@ -41,6 +41,7 @@ namespace BiblionegaBot
             var title = $"<b>{anounce.Category.GetDescription()} {anounce.Title}</b>";
             var date = $"[{anounce.Created:dd.MM.yyyy HH:mm}]";
             var message = _boldRegex.Replace(NormalizeMessage(anounce.Message), m => "<b>" + m.Value + "</b>");
+            message = _telefonogramRegex.Replace(message, m => "\n\n<b>" + m.Value.Replace("\r", "").Replace("\n", "") + "</b>\n").TrimStart('\n');
 
             return title + "\n" + date + "\n<i>" + message+"</i>";
         }

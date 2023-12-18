@@ -39,7 +39,7 @@ namespace BiblionegaBot
         static async Task Main(string[] args)
         {
             IConfiguration configuration = new ConfigurationBuilder()
-               .AddJsonFile("appsettings.json", true, true)
+               .AddJsonFile(@"c:/Bot/config/appsettings.json", true, true)
                .Build();
 
             var services = new ServiceCollection();

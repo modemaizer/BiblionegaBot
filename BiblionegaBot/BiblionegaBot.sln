@@ -7,6 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BiblionegaBot", "Biblionega
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BiblionegaBot.Tests", "..\BiblionegaBot.Tests\BiblionegaBot.Tests.csproj", "{F342FF2C-F76B-4EB2-92DF-4C216FCEDC32}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{6FAA446C-AB54-4DCA-A246-2D2AE64F2C52}"
+	ProjectSection(SolutionItems) = preProject
+		Publish.txt = Publish.txt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
